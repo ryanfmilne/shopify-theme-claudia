@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Alpine.js Cloak Support */
+[x-cloak] {
+  display: none !important;
+}
+
+/* Custom Component Classes */
+@layer components {
+  /* Primary Button - Brand Pink */
+  .btn-primary {
+    @apply bg-brand-pink text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 ease-in-out;
+    @apply hover:bg-opacity-90 hover:shadow-lg;
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-pink focus:ring-offset-2;
+    @apply active:scale-95;
+  }
+
+  /* Secondary Button - Black Outline */
+  .btn-secondary {
+    @apply bg-transparent text-brand-black font-semibold py-3 px-6 rounded-lg border-2 border-brand-black transition-all duration-300 ease-in-out;
+    @apply hover:bg-brand-black hover:text-white hover:shadow-lg;
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-black focus:ring-offset-2;
+    @apply active:scale-95;
+  }
+
+  /* Fashion Card Component */
+  .fashion-card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300;
+    @apply hover:shadow-xl hover:-translate-y-1;
+  }
+
+  /* Section Container */
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12;
+  }
+
+  /* Heading Styles */
+  .heading-primary {
+    @apply font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-brand-black;
+  }
+
+  .heading-secondary {
+    @apply font-heading text-3xl md:text-4xl font-semibold text-brand-black;
+  }
+
+  .heading-tertiary {
+    @apply font-heading text-2xl md:text-3xl font-medium text-brand-black;
+  }
+
+  /* Body Text */
+  .body-text {
+    @apply font-body text-base leading-relaxed text-gray-700;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  /* Glass morphism effect for modern fashion aesthetic */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* Gradient overlay for images */
+  .gradient-overlay {
+    position: relative;
+  }
+
+  .gradient-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
+  }
+}
