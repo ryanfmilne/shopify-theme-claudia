@@ -7,8 +7,7 @@
     "build:css": "postcss src/tailwind.css -o assets/application.css",
     "watch:css": "postcss src/tailwind.css -o assets/application.css --watch",
     "dev": "npm-run-all --parallel watch:css theme:dev",
-    "theme:dev": "shopify theme dev",
-    "theme:push": "shopify theme push"
+    "theme:dev": "shopify theme dev"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",
