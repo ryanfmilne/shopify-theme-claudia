@@ -766,6 +766,9 @@ video {
 .grid {
   display: grid;
 }
+.contents {
+  display: contents;
+}
 .hidden {
   display: none;
 }
@@ -974,7 +977,6 @@ video {
 /* Custom Component Classes */
 
 /* Custom Utilities */
-
 @media (min-width: 768px) {
 
   .md\:w-auto {
@@ -985,7 +987,6 @@ video {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
 @media (min-width: 1024px) {
 
   .lg\:grid-cols-3 {
