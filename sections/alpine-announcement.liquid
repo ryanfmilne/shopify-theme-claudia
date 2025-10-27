@@ -1,0 +1,160 @@
+{%- comment -%}
+  Alpine Announcement Bar
+  Modern rotating announcement section using Alpine.js and Tailwind CSS
+  Supports up to 3 messages with auto-rotation
+{%- endcomment -%}
+
+{%- liquid
+  assign total_blocks = section.blocks.size
+  assign rotation_speed = section.settings.rotation_speed | times: 1000
+  assign show_close_button = section.settings.show_close_button
+-%}
+
+{%- if total_blocks > 0 -%}
+  <div
+    x-data="alpineAnnouncement({{ total_blocks }}, {{ rotation_speed }}, '{{ section.id }}', {{ show_close_button }})"
+    x-show="!isClosed"
+    x-cloak
+    class="relative color-{{ section.settings.color_scheme }} gradient overflow-hidden"
+    @mouseenter="pauseRotation()"
+    @mouseleave="resumeRotation()"
+    role="region"
+    aria-label="Announcements"
+  >
+    <div class="page-width">
+      <div class="flex items-center justify-center h-[30px] relative">
+        {%- comment -%}Announcement Messages{%- endcomment -%}
+        <div class="flex items-center justify-center flex-1">
+          {%- for block in section.blocks -%}
+            <div
+              x-show="currentIndex === {{ forloop.index0 }}"
+              x-transition:enter="transition ease-in-out duration-700"
+              x-transition:enter-start="opacity-0 transform translate-x-4"
+              x-transition:enter-end="opacity-100 transform translate-x-0"
+              x-transition:leave="transition ease-in-out duration-700"
+              x-transition:leave-start="opacity-100 transform translate-x-0"
+              x-transition:leave-end="opacity-0 transform -translate-x-4"
+              {{ block.shopify_attributes }}
+              class="announcement-message flex items-center justify-center absolute inset-0"
+            >
+              {%- if block.settings.link != blank -%}
+                <a
+                  href="{{ block.settings.link }}"
+                  class="hover:opacity-80 transition-opacity font-medium text-base sm:text-lg text-white leading-[30px]"
+                  {% if block.settings.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+                >
+                  {{ block.settings.text }}
+                </a>
+              {%- else -%}
+                <span class="font-medium text-base sm:text-lg text-white leading-[30px]">{{ block.settings.text }}</span>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- comment -%}Close Button{%- endcomment -%}
+        {%- if show_close_button -%}
+          <button
+            @click="closeAnnouncement()"
+            class="absolute right-0 p-1 text-white hover:opacity-70 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white rounded"
+            aria-label="Close announcement"
+            type="button"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Alpine Announcement",
+  "tag": "section",
+  "class": "alpine-announcement-section",
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-4"
+    },
+    {
+      "type": "range",
+      "id": "rotation_speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Rotation speed",
+      "default": 5,
+      "info": "Time between message changes (only applies when multiple messages)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close_button",
+      "label": "Show close button",
+      "default": true,
+      "info": "Allow users to dismiss the announcement bar (remembered via cookie)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Message text",
+          "default": "Welcome to our store!",
+          "info": "The announcement message to display"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link (optional)",
+          "info": "Where to navigate when message is clicked"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab",
+          "label": "Open link in new tab",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Alpine Announcement",
+      "category": "Custom",
+      "blocks": [
+        {
+          "type": "message",
+          "settings": {
+            "text": "Free shipping on orders over $50!"
+          }
+        },
+        {
+          "type": "message",
+          "settings": {
+            "text": "New arrivals now in stock - Shop the collection"
+          }
+        },
+        {
+          "type": "message",
+          "settings": {
+            "text": "Sign up for our newsletter and get 10% off your first order"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

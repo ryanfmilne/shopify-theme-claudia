@@ -259,6 +259,11 @@
     {{ 'application.css' | asset_url | stylesheet_tag }}
     <link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
 
+    {%- comment -%}Alpine.js [x-cloak] directive to prevent content flash{%- endcomment -%}
+    <style>
+      [x-cloak] { display: none !important; }
+    </style>
+
     {%- if settings.cart_type == 'drawer' -%}
       {{ 'component-cart-drawer.css' | asset_url | stylesheet_tag }}
       {{ 'component-cart.css' | asset_url | stylesheet_tag }}
@@ -297,6 +302,12 @@
         document.documentElement.classList.add('shopify-design-mode');
       }
     </script>
+
+    {%- comment -%}Alpine.js Components - Load BEFORE Alpine.js core{%- endcomment -%}
+    <script src="{{ 'alpine-components.js' | asset_url }}" defer="defer"></script>
+
+    {%- comment -%}Alpine.js v3 - Load AFTER components for proper initialization{%- endcomment -%}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
 
   <body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
