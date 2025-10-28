@@ -25,13 +25,18 @@ document.addEventListener('alpine:init', () => {
     // Initialize
     init() {
       // Store initial header position from top of document
+      // Wait for images and content to load before calculating position
       this.$nextTick(() => {
-        this.headerOffsetTop = this.$refs.header.offsetTop;
+        setTimeout(() => {
+          this.headerOffsetTop = this.$refs.header.offsetTop;
+          console.log('Header offset top:', this.headerOffsetTop);
+        }, 100);
       });
 
       // Add scroll listener for sticky behavior
       if (this.stickyEnabled) {
-        window.addEventListener('scroll', () => this.handleScroll());
+        const scrollHandler = () => this.handleScroll();
+        window.addEventListener('scroll', scrollHandler, { passive: true });
       }
 
       // Close menu on escape key
@@ -47,7 +52,12 @@ document.addEventListener('alpine:init', () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
       // Header becomes sticky when it reaches the top of the viewport
-      this.isSticky = scrollTop >= this.headerOffsetTop;
+      const shouldBeSticky = scrollTop >= this.headerOffsetTop;
+
+      if (shouldBeSticky !== this.isSticky) {
+        this.isSticky = shouldBeSticky;
+        console.log('Sticky state changed:', this.isSticky, 'scrollTop:', scrollTop, 'headerOffsetTop:', this.headerOffsetTop);
+      }
     },
 
     // Toggle mobile menu
