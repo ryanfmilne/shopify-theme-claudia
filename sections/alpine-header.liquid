@@ -1,9 +1,10 @@
 {%- liquid
   assign logo_height = section.settings.logo_height
   assign sticky_header = section.settings.sticky_header
+  assign transparent_header = section.settings.transparent_header
 -%}
 
-<div x-data="alpineHeader({{ sticky_header }})">
+<div x-data="alpineHeader({{ sticky_header }}, {{ transparent_header }})">
   {%- comment -%} Spacer to prevent content jump when header becomes fixed {%- endcomment -%}
   <div
     x-show="isSticky && stickyEnabled"
@@ -14,18 +15,29 @@
   <header
     x-ref="header"
     x-cloak
-    :class="{ 'fixed top-0 left-0 right-0 z-50': isSticky && stickyEnabled }"
-    class="color-{{ section.settings.color_scheme }} gradient border-b border-gray-200 transition-all duration-200"
+    :class="{
+      'fixed top-0 left-0 right-0 z-50': isSticky && stickyEnabled,
+      'relative z-50': !isSticky || !stickyEnabled,
+      'bg-transparent text-white border-transparent': transparentMode && !isSticky,
+      'bg-white text-gray-900 border-gray-200 shadow-sm': !transparentMode || isSticky
+    }"
+    class="border-b transition-all duration-[350ms] ease-in-out"
+    style="font-family: Untitled Sans, Helvetica, sans-serif;"
     {{ section.shopify_attributes }}
   >
   <div class="page-width">
     <div class="grid grid-cols-3 items-center h-[70px] lg:h-[80px] gap-4">
 
-      {%- comment -%} LEFT COLUMN: Hamburger Menu (Mobile Only) {%- endcomment -%}
+      {%- comment -%} LEFT COLUMN: Navigation Links (Desktop) / Hamburger Menu (Mobile) {%- endcomment -%}
       <div class="flex items-center justify-start">
+        {%- comment -%} Hamburger Menu (Mobile Only) {%- endcomment -%}
         <button
           @click="toggleMobileMenu()"
-          class="lg:hidden p-2 -ml-2 text-gray-800 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 rounded"
+          :class="{
+            'text-white hover:text-gray-200': transparentMode && !isSticky,
+            'text-gray-800 hover:text-gray-600': !transparentMode || isSticky
+          }"
+          class="lg:hidden p-2 -ml-2 focus:outline-none transition-colors duration-[250ms] ease-in-out"
           aria-label="Toggle mobile menu"
           :aria-expanded="mobileMenuOpen"
         >
@@ -33,6 +45,53 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
         </button>
+
+        {%- comment -%} Desktop Navigation Links {%- endcomment -%}
+        <nav class="hidden lg:!flex items-center gap-12">
+          <a
+            href="/collections/all"
+            :class="{
+              'text-white hover:text-gray-200': transparentMode && !isSticky,
+              'text-black hover:text-gray-700': !transparentMode || isSticky
+            }"
+            class="text-[12px] font-extralight hover:underline underline-offset-4 transition-colors duration-[250ms] ease-in-out"
+          >
+            Shop
+          </a>
+
+          <a
+            href="/collections/new"
+            :class="{
+              'text-white hover:text-gray-200': transparentMode && !isSticky,
+              'text-black hover:text-gray-700': !transparentMode || isSticky
+            }"
+            class="text-[12px] font-extralight hover:underline underline-offset-4 transition-colors duration-[250ms] ease-in-out"
+          >
+            New
+          </a>
+
+          <a
+            href="/collections/bestsellers"
+            :class="{
+              'text-white hover:text-gray-200': transparentMode && !isSticky,
+              'text-black hover:text-gray-700': !transparentMode || isSticky
+            }"
+            class="text-[12px] font-extralight hover:underline underline-offset-4 transition-colors duration-[250ms] ease-in-out"
+          >
+            Bestsellers
+          </a>
+
+          <a
+            href="/pages/about"
+            :class="{
+              'text-white hover:text-gray-200': transparentMode && !isSticky,
+              'text-black hover:text-gray-700': !transparentMode || isSticky
+            }"
+            class="text-[12px] font-extralight hover:underline underline-offset-4 transition-colors duration-[250ms] ease-in-out"
+          >
+            About
+          </a>
+        </nav>
       </div>
 
       {%- comment -%} CENTER COLUMN: Logo {%- endcomment -%}
@@ -40,7 +99,11 @@
         <a href="{{ routes.root_url }}" class="block">
           {%- if settings.logo != blank -%}
             {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
-            <div style="height: {{ logo_height }}px;">
+            <div
+              :class="{ 'brightness-0 invert': transparentMode && !isSticky }"
+              class="transition-all duration-[350ms] ease-in-out"
+              style="height: {{ logo_height }}px;"
+            >
               {{ settings.logo | image_url: width: 300 | image_tag:
                 class: 'h-full w-auto',
                 alt: logo_alt,
@@ -48,18 +111,22 @@
               }}
             </div>
           {%- else -%}
-            <span class="font-heading text-2xl font-bold text-gray-900">{{ shop.name }}</span>
+            <span class="font-heading text-2xl font-bold">{{ shop.name }}</span>
           {%- endif -%}
         </a>
       </div>
 
       {%- comment -%} RIGHT COLUMN: Search, Account, Cart {%- endcomment -%}
-      <div class="flex items-center justify-end gap-6">
+      <div class="flex items-center justify-end gap-12">
 
         {%- comment -%} Search Link {%- endcomment -%}
         <a
           href="{{ routes.search_url }}"
-          class="text-[12px] font-medium hover:underline transition-all"
+          :class="{
+            'text-white hover:text-gray-200': transparentMode && !isSticky,
+            'text-black hover:text-gray-700': !transparentMode || isSticky
+          }"
+          class="text-[12px] font-extralight hover:underline underline-offset-4 transition-colors duration-[250ms] ease-in-out"
         >
           Search
         </a>
@@ -67,7 +134,11 @@
         {%- comment -%} Favorites Link {%- endcomment -%}
         <a
           href="/pages/favorites"
-          class="text-[12px] font-medium hover:underline transition-all"
+          :class="{
+            'text-white hover:text-gray-200': transparentMode && !isSticky,
+            'text-black hover:text-gray-700': !transparentMode || isSticky
+          }"
+          class="text-[12px] font-extralight hover:underline underline-offset-4 transition-colors duration-[250ms] ease-in-out"
         >
           Favorites
         </a>
@@ -75,7 +146,11 @@
         {%- comment -%} Account Link {%- endcomment -%}
         <a
           href="{{ routes.account_url }}"
-          class="text-[12px] font-medium hover:underline transition-all"
+          :class="{
+            'text-white hover:text-gray-200': transparentMode && !isSticky,
+            'text-black hover:text-gray-700': !transparentMode || isSticky
+          }"
+          class="text-[12px] font-extralight hover:underline underline-offset-4 transition-colors duration-[250ms] ease-in-out"
         >
           Account
         </a>
@@ -83,7 +158,11 @@
         {%- comment -%} Cart Link with Count {%- endcomment -%}
         <a
           href="{{ routes.cart_url }}"
-          class="text-[12px] font-medium hover:underline transition-all"
+          :class="{
+            'text-white hover:text-gray-200': transparentMode && !isSticky,
+            'text-black hover:text-gray-700': !transparentMode || isSticky
+          }"
+          class="text-[12px] font-extralight hover:underline underline-offset-4 transition-colors duration-[250ms] ease-in-out"
         >
           Cart ({{ cart.item_count }})
         </a>
@@ -196,10 +275,11 @@
       "default": 40
     },
     {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "Color scheme",
-      "default": "scheme-1"
+      "type": "checkbox",
+      "id": "transparent_header",
+      "label": "Transparent header",
+      "default": false,
+      "info": "Header has transparent background with light text. Transitions to solid white on scroll. Works best with video background tucked behind header."
     },
     {
       "type": "checkbox",

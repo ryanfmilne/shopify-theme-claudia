@@ -13,13 +13,14 @@ document.addEventListener('alpine:init', () => {
   // =============================================================================
   /**
    * Alpine Header Component
-   * Mobile-responsive header with smart sticky behavior and hamburger menu
+   * Mobile-responsive header with smart sticky behavior, transparent mode, and hamburger menu
    */
-  Alpine.data('alpineHeader', (stickyEnabled = true) => ({
+  Alpine.data('alpineHeader', (stickyEnabled = true, transparentMode = false) => ({
     // State
     mobileMenuOpen: false,
     isSticky: false,
     stickyEnabled: stickyEnabled,
+    transparentMode: transparentMode,
     headerOffsetTop: 0,
 
     // Initialize

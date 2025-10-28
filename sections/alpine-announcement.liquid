@@ -15,16 +15,22 @@
     x-data="alpineAnnouncement({{ total_blocks }}, {{ rotation_speed }}, '{{ section.id }}', {{ show_close_button }})"
     x-show="!isClosed"
     x-cloak
-    class="relative color-{{ section.settings.color_scheme }} gradient overflow-hidden"
+    class="relative z-50 color-{{ section.settings.color_scheme }} gradient overflow-hidden"
+    style="font-family: Untitled Sans, Helvetica, sans-serif;"
     @mouseenter="pauseRotation()"
     @mouseleave="resumeRotation()"
     role="region"
     aria-label="Announcements"
   >
     <div class="page-width">
-      <div class="flex items-center justify-center h-[30px] relative">
-        {%- comment -%}Announcement Messages{%- endcomment -%}
-        <div class="flex items-center justify-center flex-1">
+      <div class="grid grid-cols-3 items-center h-[30px] gap-4">
+
+        {%- comment -%}LEFT COLUMN: Empty for now{%- endcomment -%}
+        <div class="flex items-center justify-start">
+        </div>
+
+        {%- comment -%}CENTER COLUMN: Announcement Messages{%- endcomment -%}
+        <div class="flex items-center justify-center relative">
           {%- for block in section.blocks -%}
             <div
               x-show="currentIndex === {{ forloop.index0 }}"
@@ -40,31 +46,46 @@
               {%- if block.settings.link != blank -%}
                 <a
                   href="{{ block.settings.link }}"
-                  class="hover:opacity-80 transition-opacity font-medium text-[12px] text-white leading-[30px]"
+                  class="hover:opacity-80 transition-opacity font-normal text-[12px] text-white leading-[30px]"
                   {% if block.settings.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
                 >
                   {{ block.settings.text }}
                 </a>
               {%- else -%}
-                <span class="font-medium text-[12px] text-white leading-[30px]">{{ block.settings.text }}</span>
+                <span class="font-normal text-[12px] text-white leading-[30px]">{{ block.settings.text }}</span>
               {%- endif -%}
             </div>
           {%- endfor -%}
         </div>
 
-        {%- comment -%}Close Button{%- endcomment -%}
-        {%- if show_close_button -%}
-          <button
-            @click="closeAnnouncement()"
-            class="absolute right-0 p-1 text-white hover:opacity-70 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white rounded"
-            aria-label="Close announcement"
-            type="button"
+        {%- comment -%}RIGHT COLUMN: Live Shopping + Close Button{%- endcomment -%}
+        <div class="flex items-center justify-end gap-6">
+          {%- comment -%}Live Shopping Link with Video Icon{%- endcomment -%}
+          <a
+            href="/pages/live-shopping"
+            class="flex items-center gap-2.5 text-white hover:opacity-70 transition-opacity text-[12px] font-normal"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            <span>Live Shopping</span>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
             </svg>
-          </button>
-        {%- endif -%}
+          </a>
+
+          {%- comment -%}Close Button{%- endcomment -%}
+          {%- if show_close_button -%}
+            <button
+              @click="closeAnnouncement()"
+              class="p-1 text-white hover:opacity-70 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white rounded"
+              aria-label="Close announcement"
+              type="button"
+            >
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          {%- endif -%}
+        </div>
+
       </div>
     </div>
   </div>
