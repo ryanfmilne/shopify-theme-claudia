@@ -40,13 +40,13 @@
               {%- if block.settings.link != blank -%}
                 <a
                   href="{{ block.settings.link }}"
-                  class="hover:opacity-80 transition-opacity font-medium text-base sm:text-lg text-white leading-[30px]"
+                  class="hover:opacity-80 transition-opacity font-medium text-[12px] text-white leading-[30px]"
                   {% if block.settings.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
                 >
                   {{ block.settings.text }}
                 </a>
               {%- else -%}
-                <span class="font-medium text-base sm:text-lg text-white leading-[30px]">{{ block.settings.text }}</span>
+                <span class="font-medium text-[12px] text-white leading-[30px]">{{ block.settings.text }}</span>
               {%- endif -%}
             </div>
           {%- endfor -%}

@@ -3,245 +3,79 @@
  * Production-ready components following OS 2.0 best practices
  *
  * Components:
- * - cartDrawer: Cart drawer with live updates from Cart API
- * - mobileMenu: Mobile navigation with body scroll lock
- * - productGallery: Product image gallery with navigation
+ * - alpineAnnouncement: Auto-rotating announcement bar with cookie-based dismissal
+ * - alpineHeader: Mobile-responsive header with hamburger menu
  */
 
 document.addEventListener('alpine:init', () => {
+  // =============================================================================
+  // ALPINE HEADER COMPONENT
+  // =============================================================================
   /**
-   * Cart Drawer Component
-   * Handles cart state, opening/closing, and refreshing cart data from Shopify Cart API
+   * Alpine Header Component
+   * Mobile-responsive header with smart sticky behavior and hamburger menu
    */
-  Alpine.data('cartDrawer', () => ({
+  Alpine.data('alpineHeader', (stickyEnabled = true) => ({
     // State
-    isOpen: false,
-    isLoading: false,
-    cart: null,
-    error: null,
+    mobileMenuOpen: false,
+    isSticky: false,
+    stickyEnabled: stickyEnabled,
+    headerOffsetTop: 0,
 
     // Initialize
     init() {
-      // Listen for cart:add custom events from add-to-cart buttons
-      window.addEventListener('cart:add', (event) => {
-        this.refreshCart();
-        this.open();
+      // Store initial header position from top of document
+      this.$nextTick(() => {
+        this.headerOffsetTop = this.$refs.header.offsetTop;
       });
 
-      // Listen for cart:update events
-      window.addEventListener('cart:update', () => {
-        this.refreshCart();
+      // Add scroll listener for sticky behavior
+      if (this.stickyEnabled) {
+        window.addEventListener('scroll', () => this.handleScroll());
+      }
+
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.mobileMenuOpen) {
+          this.closeMobileMenu();
+        }
       });
-
-      // Load cart on init
-      this.refreshCart();
     },
 
-    // Open cart drawer
-    open() {
-      this.isOpen = true;
-      document.body.classList.add('overflow-hidden');
-    },
+    // Handle scroll for sticky behavior
+    handleScroll() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-    // Close cart drawer
-    close() {
-      this.isOpen = false;
-      document.body.classList.remove('overflow-hidden');
-    },
-
-    // Toggle cart drawer
-    toggle() {
-      this.isOpen ? this.close() : this.open();
-    },
-
-    // Refresh cart data from Shopify Cart API
-    async refreshCart() {
-      this.isLoading = true;
-      this.error = null;
-
-      try {
-        const response = await fetch('/cart.js', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        this.cart = await response.json();
-      } catch (error) {
-        console.error('Error fetching cart:', error);
-        this.error = 'Unable to load cart. Please refresh the page.';
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    // Update item quantity
-    async updateQuantity(lineItemKey, quantity) {
-      this.isLoading = true;
-      this.error = null;
-
-      try {
-        const response = await fetch('/cart/change.js', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: lineItemKey,
-            quantity: quantity,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const updatedCart = await response.json();
-        this.cart = updatedCart;
-
-        // Dispatch event for other components to listen
-        window.dispatchEvent(new CustomEvent('cart:updated', { detail: updatedCart }));
-      } catch (error) {
-        console.error('Error updating cart:', error);
-        this.error = 'Unable to update cart. Please try again.';
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    // Remove item from cart
-    async removeItem(lineItemKey) {
-      await this.updateQuantity(lineItemKey, 0);
-    },
-
-    // Format money using Shopify's money format
-    formatMoney(cents) {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(cents / 100);
-    },
-  }));
-
-  /**
-   * Mobile Menu Component
-   * Handles mobile navigation with body scroll lock
-   */
-  Alpine.data('mobileMenu', () => ({
-    // State
-    isOpen: false,
-
-    // Open mobile menu
-    open() {
-      this.isOpen = true;
-      // Lock body scroll
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = this.getScrollbarWidth() + 'px';
-    },
-
-    // Close mobile menu
-    close() {
-      this.isOpen = false;
-      // Unlock body scroll
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
+      // Header becomes sticky when it reaches the top of the viewport
+      this.isSticky = scrollTop >= this.headerOffsetTop;
     },
 
     // Toggle mobile menu
-    toggle() {
-      this.isOpen ? this.close() : this.open();
-    },
+    toggleMobileMenu() {
+      this.mobileMenuOpen = !this.mobileMenuOpen;
 
-    // Get scrollbar width to prevent layout shift
-    getScrollbarWidth() {
-      return window.innerWidth - document.documentElement.clientWidth;
-    },
-
-    // Close on escape key
-    handleEscape(event) {
-      if (event.key === 'Escape' && this.isOpen) {
-        this.close();
+      // Prevent body scroll when menu is open
+      if (this.mobileMenuOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
       }
+    },
+
+    // Close mobile menu
+    closeMobileMenu() {
+      this.mobileMenuOpen = false;
+      document.body.style.overflow = '';
     },
   }));
 
-  /**
-   * Product Gallery Component
-   * Image switcher with next/previous navigation and thumbnail selection
-   */
-  Alpine.data('productGallery', (images = []) => ({
-    // State
-    currentIndex: 0,
-    images: images,
 
-    // Get current image
-    get currentImage() {
-      return this.images[this.currentIndex] || null;
-    },
-
-    // Check if there are multiple images
-    get hasMultipleImages() {
-      return this.images.length > 1;
-    },
-
-    // Check if at first image
-    get isFirst() {
-      return this.currentIndex === 0;
-    },
-
-    // Check if at last image
-    get isLast() {
-      return this.currentIndex === this.images.length - 1;
-    },
-
-    // Navigate to next image
-    next() {
-      if (!this.isLast) {
-        this.currentIndex++;
-      } else {
-        // Loop back to first image
-        this.currentIndex = 0;
-      }
-    },
-
-    // Navigate to previous image
-    previous() {
-      if (!this.isFirst) {
-        this.currentIndex--;
-      } else {
-        // Loop to last image
-        this.currentIndex = this.images.length - 1;
-      }
-    },
-
-    // Go to specific image by index
-    goTo(index) {
-      if (index >= 0 && index < this.images.length) {
-        this.currentIndex = index;
-      }
-    },
-
-    // Handle keyboard navigation
-    handleKeydown(event) {
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        this.previous();
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        this.next();
-      }
-    },
-  }));
-
+  // =============================================================================
+  // ALPINE ANNOUNCEMENT COMPONENT
+  // =============================================================================
   /**
    * Alpine Announcement Component
-   * Auto-rotating announcement bar (when multiple messages exist)
-   * Supports pause on hover, keyboard controls, and cookie-based dismissal
+   * Auto-rotating announcement bar with cookie-based dismissal
    */
   Alpine.data('alpineAnnouncement', (totalMessages = 1, rotationSpeed = 5000, sectionId = '', showCloseButton = true) => ({
     // State
@@ -249,7 +83,6 @@ document.addEventListener('alpine:init', () => {
     totalMessages: totalMessages,
     rotationSpeed: rotationSpeed,
     intervalId: null,
-    isPaused: false,
     isClosed: false,
     sectionId: sectionId,
     showCloseButton: showCloseButton,
@@ -265,9 +98,6 @@ document.addEventListener('alpine:init', () => {
       if (!this.isClosed && this.totalMessages > 1) {
         this.startRotation();
       }
-
-      // Keyboard navigation
-      this.$el.addEventListener('keydown', (e) => this.handleKeydown(e));
     },
 
     // Start auto-rotation
@@ -277,9 +107,7 @@ document.addEventListener('alpine:init', () => {
       }
 
       this.intervalId = setInterval(() => {
-        if (!this.isPaused) {
-          this.next();
-        }
+        this.next();
       }, this.rotationSpeed);
     },
 
@@ -291,55 +119,9 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    // Pause rotation (on hover)
-    pauseRotation() {
-      this.isPaused = true;
-    },
-
-    // Resume rotation (on mouse leave)
-    resumeRotation() {
-      this.isPaused = false;
-    },
-
     // Navigate to next message
     next() {
       this.currentIndex = (this.currentIndex + 1) % this.totalMessages;
-    },
-
-    // Navigate to previous message
-    previous() {
-      this.currentIndex = (this.currentIndex - 1 + this.totalMessages) % this.totalMessages;
-    },
-
-    // Go to specific message by index
-    goTo(index) {
-      if (index >= 0 && index < this.totalMessages) {
-        this.currentIndex = index;
-
-        // Reset rotation timer when manually navigating (only if multiple messages)
-        if (this.totalMessages > 1) {
-          this.stopRotation();
-          this.startRotation();
-        }
-      }
-    },
-
-    // Handle keyboard navigation
-    handleKeydown(event) {
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        this.previous();
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        this.next();
-      } else if (event.key >= '1' && event.key <= '3') {
-        // Number keys 1-3 for direct navigation
-        const index = parseInt(event.key) - 1;
-        if (index < this.totalMessages) {
-          event.preventDefault();
-          this.goTo(index);
-        }
-      }
     },
 
     // Close announcement and set cookie
