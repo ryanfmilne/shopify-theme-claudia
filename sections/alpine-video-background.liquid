@@ -1,0 +1,142 @@
+{%- liquid
+  assign section_height = section.settings.height
+  assign video_url = section.settings.video_url
+  assign fallback_image = section.settings.fallback_image
+  assign video_link = section.settings.video_link
+  assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0
+-%}
+
+<section
+  class="relative w-full overflow-hidden color-{{ section.settings.color_scheme }}"
+  style="height: {{ section_height }}px;"
+  {{ section.shopify_attributes }}
+>
+
+  {%- comment -%} Optional Clickable Overlay Link {%- endcomment -%}
+  {%- if video_link != blank -%}
+    <a
+      href="{{ video_link }}"
+      class="absolute inset-0 z-10 cursor-pointer"
+      aria-label="View more"
+    >
+      <span class="sr-only">Navigate to {{ video_link }}</span>
+    </a>
+  {%- endif -%}
+
+  {%- comment -%} Video Background (Desktop Only) {%- endcomment -%}
+  {%- if video_url != blank -%}
+    <video
+      autoplay
+      muted
+      loop
+      playsinline
+      class="hidden lg:block absolute inset-0 w-full h-full object-cover"
+      aria-hidden="true"
+    >
+      {%- if video_url.type == 'mp4' -%}
+        <source src="{{ video_url }}" type="video/mp4">
+      {%- elsif video_url.type == 'webm' -%}
+        <source src="{{ video_url }}" type="video/webm">
+      {%- else -%}
+        <source src="{{ video_url }}" type="video/mp4">
+      {%- endif -%}
+      Your browser does not support the video tag.
+    </video>
+  {%- endif -%}
+
+  {%- comment -%} Fallback Image (Mobile + Video Load State) {%- endcomment -%}
+  {%- if fallback_image != blank -%}
+    <div class="absolute inset-0 w-full h-full {% if video_url != blank %}lg:hidden{% endif %}">
+      {{ fallback_image | image_url: width: 1920 | image_tag:
+        class: 'w-full h-full object-cover',
+        alt: fallback_image.alt | default: 'Hero background',
+        loading: 'eager',
+        sizes: '100vw',
+        widths: '375, 750, 1100, 1500, 1920'
+      }}
+    </div>
+  {%- endif -%}
+
+  {%- comment -%} Dark Overlay for Text Readability {%- endcomment -%}
+  {%- if overlay_opacity > 0 -%}
+    <div
+      class="absolute inset-0 bg-black pointer-events-none z-[5]"
+      style="opacity: {{ overlay_opacity }};"
+    ></div>
+  {%- endif -%}
+
+  {%- comment -%} Content Placeholder (Future: Add blocks for text, CTA buttons) {%- endcomment -%}
+  <div class="relative z-10 flex items-center justify-center h-full pointer-events-none">
+    {%- comment -%}
+      Future content area for:
+      - Heading text
+      - Subheading
+      - CTA buttons
+      - Custom blocks
+    {%- endcomment -%}
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "Alpine Video Background",
+  "class": "section-alpine-video-background",
+  "settings": [
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "Background video",
+      "accept": ["youtube", "vimeo"],
+      "info": "Upload video or paste YouTube/Vimeo URL. Video shown on desktop only. Recommended: MP4 format, max 20MB, 1920x1080px"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "Background image",
+      "info": "Shown on mobile devices and while video loads. Required if using video."
+    },
+    {
+      "type": "url",
+      "id": "video_link",
+      "label": "Section link (optional)",
+      "info": "Makes the entire video/image section clickable"
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "label": "Section height",
+      "min": 400,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "default": 600,
+      "info": "Height of the video background section"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Dark overlay opacity",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 30,
+      "info": "Darkens the background for better text readability (0 = no overlay)"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1",
+      "info": "Used for future text/content overlay"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Alpine Video Background",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
