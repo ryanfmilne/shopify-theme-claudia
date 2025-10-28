@@ -24,13 +24,12 @@ document.addEventListener('alpine:init', () => {
 
     // Initialize
     init() {
-      // Store initial header position from top of document
-      // Wait for images and content to load before calculating position
-      this.$nextTick(() => {
-        setTimeout(() => {
-          this.headerOffsetTop = this.$refs.header.offsetTop;
-          console.log('Header offset top:', this.headerOffsetTop);
-        }, 100);
+      // Initial position calculation
+      this.recalculatePosition();
+
+      // Listen for announcement bar dismissal to recalculate position
+      window.addEventListener('announcement-closed', () => {
+        this.recalculatePosition();
       });
 
       // Add scroll listener for sticky behavior
@@ -44,6 +43,16 @@ document.addEventListener('alpine:init', () => {
         if (e.key === 'Escape' && this.mobileMenuOpen) {
           this.closeMobileMenu();
         }
+      });
+    },
+
+    // Recalculate header offset position
+    recalculatePosition() {
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.headerOffsetTop = this.$refs.header.offsetTop;
+          console.log('Header position recalculated:', this.headerOffsetTop);
+        }, 350); // Wait for announcement bar transition (300ms) + buffer
       });
     },
 
@@ -141,6 +150,9 @@ document.addEventListener('alpine:init', () => {
 
       // Set cookie to remember dismissal for 30 days
       this.setCookie(`announcement-${this.sectionId}-closed`, 'true', 30);
+
+      // Notify other components that layout has changed
+      window.dispatchEvent(new CustomEvent('announcement-closed'));
     },
 
     // Get cookie by name
